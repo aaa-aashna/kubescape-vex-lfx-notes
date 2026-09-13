@@ -15,3 +15,27 @@
 
 
 we will be collecting all this info and then start working on it...
+
+
+the expected structure is something like this :
+
+
+OpenVulnerabilityExchangeContainer
+│
+└── Spec: VEX document
+    │
+    └── Statements
+        │
+        ├── Vulnerability
+        │    └── ID → CVE
+        │
+        ├── Products
+        │    └── Subcomponents
+        │         └── ID → package/product identity
+        │
+        ├── Status
+        │    └── not_affected / affected / fixed
+        │
+        ├── Justification
+        │
+        └── ImpactStatement
