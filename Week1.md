@@ -1,16 +1,18 @@
 # Week 1 — Kubescape VEX Project
 
-## Objective
+## Project
 
-The main objective of Week 1 was to understand the existing Kubescape vulnerability-scanning and VEX flow before making implementation changes for the **External VEX Ingestion** project.
+**CNCF - Kubescape: External VEX Ingestion for Kubescape Vulnerability Scanning**
 
-The focus was on understanding the existing pipeline, the main vulnerability/VEX data structures, and where external VEX can eventually be integrated.
+## Week 1 goal
+
+The goal for Week 1 was to understand how Kubescape finds vulnerabilities and where VEX information fits in the existing flow. Before changing the code, I wanted to understand the main components, the data passed between them, and the parts that may be reused for external VEX ingestion.
+
+I also started keeping notes about the existing VEX structure and the possible connection with the selected LFX project.
 
 ---
 
-## 1. Vulnerability Scanning Pipeline
-
-The vulnerability flow can be understood as:
+## 1. Vulnerability scanning flow
 
 ```text
 Container Image
@@ -41,90 +43,104 @@ SecurityException      External VEX
        Vulnerability Manifest
 ```
 
-### Image
+### Container image
 
-The container image is the object being scanned. The image contains the operating-system packages, libraries, binaries, and other software components that may have known vulnerabilities.
+This is the image that we want to scan. It can contain operating-system packages, libraries, binaries and other software components. Some of these components may have known CVEs.
 
 ### Syft
 
-Syft is used to generate an **SBOM (Software Bill of Materials)** from the container image. The SBOM provides an inventory of the components present in the image.
+Syft is used to create an SBOM from the image. It identifies the software packages and components present in the image.
 
 ### SBOM
 
-The SBOM is the inventory that tells the vulnerability scanner what packages/components exist in the image. Vulnerability matching is performed against these components.
+SBOM means **Software Bill of Materials**. It is the inventory of the components inside the image. Grype uses this information to check which components have known vulnerabilities.
 
 ### Grype
 
-Grype is the vulnerability scanner used in the pipeline. It takes the software/component inventory and matches components against known vulnerability information to produce vulnerability findings.
+Grype is the vulnerability scanner used in the vulnerability pipeline. It matches the components from the SBOM with vulnerability data and produces vulnerability findings.
 
-### Vulnerability Matches
+### Vulnerability match
 
-A vulnerability match connects a vulnerable component/package with a vulnerability identifier such as a CVE. A finding therefore represents that a particular component in an image matches a known vulnerability.
+A vulnerability match connects a component/package with a vulnerability ID, for example a CVE. A finding should therefore be understood as:
 
-### SecurityException
+```text
+Image
+  -> Package
+      -> Vulnerability ID / CVE
+          -> Finding details
+```
 
-SecurityException represents an exception that can prevent a vulnerability finding from being treated as an active finding. Its matching model is relevant to this project because an external vendor VEX statement can provide a similar outcome, especially for `not_affected` cases.
+### Filtering and suppression
 
-### External VEX
+After findings are created, Kubescape has to decide which findings should be shown to the user. Security exceptions and VEX information can affect this decision.
 
-External VEX is the main focus of this LFX project. Vendors such as Red Hat or Chainguard can publish statements describing the status of vulnerabilities affecting their products/images.
-
-Kubescape currently produces VEX from its own scan results, but the selected project is intended to add **read-only ingestion of third-party VEX** so that vendor statements can be applied to Kubescape vulnerability findings.
-
-### Filtering / Suppression
-
-After vulnerability findings are produced, Kubescape needs to determine which findings should remain visible and which can be suppressed or treated differently based on applicable security exceptions and VEX information.
-
-For this project, external `not_affected` and `fixed` statements are expected to suppress matching findings before they are presented to the user.
+For our project, external VEX statements with statuses such as `not_affected` or `fixed` may allow matching findings to be suppressed. The match must be done against the correct vulnerability and product/component, not only against the CVE name.
 
 ---
 
-## 2. VEX Concepts
+## 2. VEX basics
 
-**VEX (Vulnerability Exploitability eXchange)** provides machine-readable information about the status of a vulnerability for a particular product/component.
+VEX means **Vulnerability Exploitability eXchange**. It gives information about the status of a vulnerability for a particular product or component.
 
 The important statuses for this project are:
 
 - **`not_affected`** — the vulnerability does not affect the referenced product/component in the stated context.
-- **`fixed`** — the vulnerability has been fixed in the referenced product/component/version.
-- **`affected`** — the vulnerability does affect the referenced product/component.
+- **`fixed`** — the vulnerability has been fixed for the referenced product/component/version.
+- **`affected`** — the product/component is affected by the vulnerability.
 
-For external VEX ingestion, we are primarily interested in vendor statements that can justify suppressing a scan finding.
+The important point is that VEX is not just a list of CVEs. It connects a vulnerability with a product/component and gives the status and, where available, the reason for that status.
+
+Example:
+
+```text
+Vulnerability: CVE-XXXX-YYYY
+Product: example-image:1.0
+Status: not_affected
+Justification: The vulnerable code is not present or reachable
+```
+
+This is only an example to understand the relationship between the fields.
 
 ---
 
 ## 3. OpenVEX
 
-OpenVEX is an open, machine-readable format for communicating VEX statements.
+OpenVEX is a machine-readable format used to communicate VEX statements.
 
-A simplified representation is:
+A simplified view is:
 
 ```text
 VEX Document
    |
-   +-- Vulnerability
-   |      └── CVE / vulnerability ID
+   +-- Vulnerability ID
    |
-   +-- Product
-   |      └── Product/component identity
+   +-- Product / Component
    |
    +-- Status
-   |      └── not_affected / affected / fixed
+   |      +-- not_affected
+   |      +-- affected
+   |      +-- fixed
    |
    +-- Justification
    |
-   └-- Impact Statement
+   +-- Impact Statement
 ```
 
-The important idea is that a VEX statement connects a **vulnerability** to a **specific product/component** and describes the vulnerability status for that product/component.
+The main idea is:
+
+```text
+Vulnerability + Product + Status + Reason
+```
+
+For external VEX ingestion, Kubescape will need to read these statements and compare them with the findings produced by the vulnerability scanner.
 
 ---
 
-## 4. OpenVulnerabilityExchangeContainer
+## 4. Existing VEX storage shape
 
-Kubescape/kubevuln already has a storage shape for VEX documents: `OpenVulnerabilityExchangeContainer`.
+The project proposal mentions that kubevuln already persists VEX using the `OpenVulnerabilityExchangeContainer` shape.
 
-Conceptually, the structure can be thought of as:
+Conceptually, I understand it as:
 
 ```text
 OpenVulnerabilityExchangeContainer
@@ -132,83 +148,139 @@ OpenVulnerabilityExchangeContainer
     └── VEX document
         └── Statements
             ├── Vulnerability
-            │    └── ID (for example, CVE)
+            │    └── ID / CVE
             ├── Products / Subcomponents
-            │    └── Product/component identity
+            │    └── Product identity
             ├── Status
             │    └── not_affected / affected / fixed
             ├── Justification
             └── Impact Statement
 ```
 
-This existing storage model is important because the project proposal says the external VEX controller can persist fetched documents using the existing `OpenVulnerabilityExchangeContainer` shape, or a clearly scoped sibling kind if necessary.
+This is important because the new controller should preferably reuse the existing storage shape instead of creating another unrelated representation.
+
+The next step is to locate the real type definition in the Kubescape source code and check the exact fields instead of relying only on this conceptual diagram.
 
 ---
 
-## 5. Why External VEX Is Needed
+## 5. Small code example
 
-A large number of container vulnerabilities can originate from distribution base images such as nginx, Alpine, Python, or RHEL UBI.
+The following is a simplified example of the kind of data we need to understand. It is not copied from Kubescape and is not the final implementation.
 
-Vendors already perform their own vulnerability triage and may publish VEX/CSAF information stating that a particular CVE is `not_affected` or has been `fixed` for their products.
+```go
+// Simplified example only.
+type VEXStatement struct {
+    Vulnerability string
+    Product       string
+    Status        string
+    Justification string
+}
 
-The problem is that Kubescape's current vulnerability pipeline does not consume these external vendor statements.
-
-Therefore, the scanner can report vulnerabilities that an upstream vendor has already determined are not applicable or already fixed.
-
-The selected LFX project aims to close this gap by adding external VEX ingestion and applying the relevant vendor statements to Kubescape scan results.
-
----
-
-## 6. Connection to the Selected LFX Project
-
-The selected project is **External VEX Ingestion for Kubescape Vulnerability Scanning**.
-
-The major pieces identified from the proposal are:
-
-1. A namespaced `VEXSource` CRD to declare an external feed.
-2. A controller to fetch, validate, refresh, and persist external VEX documents.
-3. A join step in the vulnerability scan pipeline to match external VEX statements to scan findings.
-4. Suppression of matching `not_affected` / `fixed` findings.
-5. Preservation of provenance so we know which document/statement caused a suppression.
-6. Deduplication and normalization across feeds.
-7. End-to-end testing against at least one real vendor feed.
-
----
-
-## 7. Week 1 Outcome
-
-By the end of Week 1, the main goal was to establish the vocabulary and high-level architecture needed for implementation.
-
-The current understanding is:
-
-```text
-Image
-  -> SBOM generation
-  -> vulnerability matching
-  -> vulnerability findings
-  -> VEX / exception information
-  -> filtering / suppression
-  -> vulnerability manifest / user-visible results
+func shouldSuppress(statement VEXStatement) bool {
+    return statement.Status == "not_affected" ||
+        statement.Status == "fixed"
+}
 ```
 
-The next step is to move from the conceptual flow into the actual implementation points in the Kubescape source code.
+This example shows the basic idea, but real Kubescape code will also need to check whether the statement applies to the exact image/component and vulnerability finding. We should not implement the real matching logic until we understand the existing types and matching model.
+
+Another simplified view of the future join step is:
+
+```go
+for _, finding := range findings {
+    statement := findMatchingVEX(finding, externalVEX)
+
+    if statement != nil && shouldSuppress(*statement) {
+        // Keep the source document and statement information.
+        // Do not lose the reason for suppression.
+        continue
+    }
+
+    visibleFindings = append(visibleFindings, finding)
+}
+```
+
+This is only a high-level example of the expected behavior. The actual implementation and function names need to come from the Kubescape codebase.
 
 ---
 
-## 8. Week 2 Plan
+## 6. Why external VEX is needed
 
-The Week 2 focus will be on the existing implementation and the first concrete design decisions.
+Many container images use common distribution base images such as Alpine, nginx, Python or RHEL UBI. These images can produce a large number of CVEs during scanning.
+
+Vendors may already have investigated some of these CVEs and published VEX or CSAF statements saying that a product is `not_affected` or that a vulnerability is `fixed`.
+
+Kubescape currently produces VEX from its own scan results, but the selected project is about consuming VEX published by other parties.
+
+The problem we are trying to solve is:
+
+```text
+Vendor has already triaged a CVE
+                |
+                v
+Vendor publishes VEX
+                |
+                v
+Kubescape does not consume it yet
+                |
+                v
+Finding may still be shown to the user
+```
+
+Our project will add read-only ingestion of these external documents and apply the relevant statements to scan findings.
+
+---
+
+## 7. Connection with the LFX project
+
+The selected project has these main parts:
+
+1. Create a namespaced `VEXSource` CRD.
+2. Store the feed URL, format, image scope and refresh interval.
+3. Build a controller that fetches, validates and refreshes external VEX documents.
+4. Persist the documents using the existing VEX storage shape, or a clearly scoped sibling kind if required.
+5. Add a join step between external VEX statements and vulnerability findings.
+6. Suppress matching `not_affected` and `fixed` findings.
+7. Keep provenance, including which document and statement caused the suppression.
+8. Handle deduplication and normalization across feeds.
+9. Add end-to-end tests against at least one real feed.
+
+The project is read-only ingestion. Creating or editing VEX documents inside the cluster is out of scope.
+
+---
+
+## 8. Week 1 outcome
+
+During Week 1, I worked on understanding the vocabulary and high-level flow needed for the project:
+
+- How a container image is scanned.
+- How Syft creates an SBOM.
+- How Grype produces vulnerability matches.
+- Where SecurityException and external VEX fit into the flow.
+- What VEX statuses mean.
+- Why the product/component identity is important when matching a VEX statement.
+- Why the existing `OpenVulnerabilityExchangeContainer` shape may be reused.
+- What the main deliverables of the selected project are.
+
+The main thing still to be done is to connect this understanding with the actual Kubescape source code and confirm the exact implementation points.
+
+---
+
+## 9. Week 2 plan
+
+In Week 2, I will move from the high-level concepts to the actual code.
 
 ### Planned work
 
-- Locate and study `OpenVulnerabilityExchangeContainer` in the source tree.
-- Trace how Kubescape currently generates and persists its own VEX.
-- Trace the vulnerability manifest generation path and identify the best point for the external-VEX join.
-- Study the existing `WatchHandler` and `CooldownQueue` machinery that may be reused by the external feed controller.
-- Review the existing SecurityException matching model in more detail.
-- Start defining the fields and behavior of the proposed `VEXSource` CRD.
-- Identify the smallest first implementation task that can be tested independently.
+- Locate and read the actual `OpenVulnerabilityExchangeContainer` definition.
+- Find how Kubescape currently creates and persists its own VEX.
+- Trace the vulnerability manifest generation path.
+- Identify where the external VEX join can be added.
+- Study `WatchHandler` and `CooldownQueue` and see how they can be reused by the controller.
+- Read the existing SecurityException matching logic.
+- Start defining the fields and behavior of the `VEXSource` CRD.
+- Choose a small first task that can be implemented and tested independently.
 
-### Expected Week 2 outcome
+### Expected outcome for Week 2
 
-A concrete understanding of the relevant code paths and an initial implementation/design proposal for the first part of external VEX ingestion.
+By the end of Week 2, I want to have a clearer understanding of the relevant code paths and an initial design for the first implementation task. I also want to start making small, tested changes in the actual Kubescape repository instead of only working on conceptual notes.
