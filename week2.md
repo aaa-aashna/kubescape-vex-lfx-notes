@@ -1,6 +1,6 @@
 ## 9. Week 2 plan
 
-I will move from the high-level concepts to the actual code.
+I will move from the high level concepts to the actual code.
 
 ### Planned work
 
