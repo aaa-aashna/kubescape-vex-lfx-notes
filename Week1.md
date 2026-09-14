@@ -43,6 +43,10 @@ SecurityException      External VEX
        Vulnerability Manifest
 ```
 
+This is the original flow currently followed by Kubescape, and we need to advance it.
+
+Below are a few terms to keep in mind:
+
 ### Container image
 
 This is the image that we want to scan. It can contain operating-system packages, libraries, binaries and other software components. Some of these components may have known CVEs.
@@ -263,24 +267,3 @@ During Week 1, I worked on understanding the vocabulary and high-level flow need
 - What the main deliverables of the selected project are.
 
 The main thing still to be done is to connect this understanding with the actual Kubescape source code and confirm the exact implementation points.
-
----
-
-## 9. Week 2 plan
-
-In Week 2, I will move from the high-level concepts to the actual code.
-
-### Planned work
-
-- Locate and read the actual `OpenVulnerabilityExchangeContainer` definition.
-- Find how Kubescape currently creates and persists its own VEX.
-- Trace the vulnerability manifest generation path.
-- Identify where the external VEX join can be added.
-- Study `WatchHandler` and `CooldownQueue` and see how they can be reused by the controller.
-- Read the existing SecurityException matching logic.
-- Start defining the fields and behavior of the `VEXSource` CRD.
-- Choose a small first task that can be implemented and tested independently.
-
-### Expected outcome for Week 2
-
-By the end of Week 2, I want to have a clearer understanding of the relevant code paths and an initial design for the first implementation task. I also want to start making small, tested changes in the actual Kubescape repository instead of only working on conceptual notes.
