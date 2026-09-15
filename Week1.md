@@ -1,8 +1,12 @@
 # Week 1 — Kubescape VEX Project
 
+## Project
+
+**CNCF - Kubescape: External VEX Ingestion for Kubescape Vulnerability Scanning**
+
 ## Week 1 goal
 
-I kept the Week 1 to understand how Kubescape finds vulnerabilities and where VEX information fits in the existing flow. Before changing the code, I wanted to understand the main components, the data passed between them, and the parts that may be reused for external VEX ingestion.
+The goal for Week 1 was to understand how Kubescape finds vulnerabilities and where VEX information fits in the existing flow. Before changing the code, I wanted to understand the main components, the data passed between them, and the parts that may be reused for external VEX ingestion.
 
 I also started keeping notes about the existing VEX structure and the possible connection with the selected LFX project.
 
@@ -38,9 +42,6 @@ SecurityException      External VEX
                  v
        Vulnerability Manifest
 ```
-This is the current flow which is used in kubescape which we will advance in upcoming weeks 
-
-I also made notes of few terms which should be kept handy.
 
 ### Container image
 
@@ -60,8 +61,7 @@ Grype is the vulnerability scanner used in the vulnerability pipeline. It matche
 
 ### Vulnerability match
 
-A vulnerability match connects a component/package with a vulnerability ID, for example a CVE.
-Basic flow is like :
+A vulnerability match connects a component/package with a vulnerability ID, for example a CVE. A finding should therefore be understood as:
 
 ```text
 Image
@@ -82,15 +82,49 @@ For our project, external VEX statements with statuses such as `not_affected` or
 
 VEX means **Vulnerability Exploitability eXchange**. It gives information about the status of a vulnerability for a particular product or component.
 
-Main statuses are like 
+The important statuses for this project are:
+
 - **`not_affected`** — the vulnerability does not affect the referenced product/component in the stated context.
 - **`fixed`** — the vulnerability has been fixed for the referenced product/component/version.
 - **`affected`** — the product/component is affected by the vulnerability.
 
+The important point is that VEX is not just a list of CVEs. It connects a vulnerability with a product/component and gives the status and, where available, the reason for that status.
+
+Example:
+
+```text
+Vulnerability: CVE-XXXX-YYYY
+Product: example-image:1.0
+Status: not_affected
+Justification: The vulnerable code is not present or reachable
+```
+
+This is only an example to understand the relationship between the fields.
+
+---
 
 ## 3. OpenVEX
 
 OpenVEX is a machine-readable format used to communicate VEX statements.
+
+A simplified view is:
+
+```text
+VEX Document
+   |
+   +-- Vulnerability ID
+   |
+   +-- Product / Component
+   |
+   +-- Status
+   |      +-- not_affected
+   |      +-- affected
+   |      +-- fixed
+   |
+   +-- Justification
+   |
+   +-- Impact Statement
+```
 
 The main idea is:
 
@@ -129,7 +163,48 @@ The next step is to locate the real type definition in the Kubescape source code
 
 ---
 
-## Why VEX is nedded 
+## 5. Small code example
+
+The following is a simplified example of the kind of data we need to understand. It is not copied from Kubescape and is not the final implementation.
+
+```go
+// Simplified example only.
+type VEXStatement struct {
+    Vulnerability string
+    Product       string
+    Status        string
+    Justification string
+}
+
+func shouldSuppress(statement VEXStatement) bool {
+    return statement.Status == "not_affected" ||
+        statement.Status == "fixed"
+}
+```
+
+This example shows the basic idea, but real Kubescape code will also need to check whether the statement applies to the exact image/component and vulnerability finding. We should not implement the real matching logic until we understand the existing types and matching model.
+
+Another simplified view of the future join step is:
+
+```go
+for _, finding := range findings {
+    statement := findMatchingVEX(finding, externalVEX)
+
+    if statement != nil && shouldSuppress(*statement) {
+        // Keep the source document and statement information.
+        // Do not lose the reason for suppression.
+        continue
+    }
+
+    visibleFindings = append(visibleFindings, finding)
+}
+```
+
+This is only a high-level example of the expected behavior. The actual implementation and function names need to come from the Kubescape codebase.
+
+---
+
+## 6. Why external VEX is needed
 
 Many container images use common distribution base images such as Alpine, nginx, Python or RHEL UBI. These images can produce a large number of CVEs during scanning.
 
@@ -156,7 +231,7 @@ Our project will add read-only ingestion of these external documents and apply t
 
 ---
 
-## 7. Relating it with LFX project
+## 7. Connection with the LFX project
 
 The selected project has these main parts:
 
@@ -188,50 +263,3 @@ During Week 1, I worked on understanding the vocabulary and high-level flow need
 - What the main deliverables of the selected project are.
 
 The main thing still to be done is to connect this understanding with the actual Kubescape source code and confirm the exact implementation points.
-
----
-
-## Week 2 
-
-### Goal for this part of Week 2
-
-Week 2 was to start connecting the Week 1 concepts with the actual kubevuln codebase. I started exploring the repository structure and locating the files related to vulnerability scanning, VEX handling and the existing Kubernetes resources.
-
-### Main Points 
-
-- Started exploring the kubevuln repository structure.
-- Located the `internal` packages and checked how the project is organized.
-- Started looking for the existing VEX-related types and storage models.
-- Investigated the `OpenVulnerabilityExchangeContainer` concept and where it may be used.
-- Started tracing how vulnerability findings are created and passed through the scanning flow.
-- Read about the existing `WatchHandler` and `CooldownQueue` components mentioned in the proposal.
-- Started understanding how these components may help with periodically fetching external VEX feeds.
-- Reviewed the difference between:
-  - fetching external VEX documents,
-  - storing the documents,
-  - matching VEX statements with vulnerability findings,
-  - suppressing findings.
-- Started identifying which parts should be implemented first instead of trying to build the complete controller at once.
-
-### Understanding of the implementation flow
-
-```text
-VEXSource CRD
-      |
-      v
-Fetch external VEX feed
-      |
-      v
-Validate and parse document
-      |
-      v
-Store VEX information
-      |
-      v
-Match with vulnerability findings
-      |
-      v
-Suppress matching findings
-```
-
-The first implementation should focus on understanding the existing types and code flow. After that, a small independent part such as the VEX source model, document parsing or matching logic can be implemented and tested.
