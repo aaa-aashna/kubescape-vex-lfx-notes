@@ -13,8 +13,22 @@ I will move from the high level concepts to the actual code.
 - Start defining the fields and behavior of the `VEXSource` CRD.
 - Choose a small first task that can be implemented and tested independently.
 
-### Expected outcome for Week 2
+Okay so now , i am thinking of add a file called document.go
+Which will solely focus on the actual data VEX structure and validation logic 
+And then with that i have added document_test.go which will check the test and verify if all things are workking and passes the test cases 
 
-By the end of Week 2, I want to have a clearer understanding of the relevant code paths and an initial design for the first implementation task. 
+I have added the package string cuz
+STRINGS 
+Used to check whether a string is empty or contains only spaces:
+strings.TrimSpace(document.ID) == ""
+This catches both:
+""
+and:
+"   "
 
-I also want to start making small, tested changes in the actual Kubescape repository instead of only working on conceptual notes.
+
+
+
+
+
+
