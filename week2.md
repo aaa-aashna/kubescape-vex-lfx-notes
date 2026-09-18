@@ -29,7 +29,15 @@ and:
 The initial VEX ingestion changes are in place, and the relevant package-level tests are passing. The full repository test suite is currently taking longer than expected, so I’m validating the remaining components separately and will keep pushing incremental updates as the implementation progresses.
 
 
+'
+case StatusNotAffected,
+		StatusAffected,
+		StatusFixed,
+		StatusUnderInvestigation:
+		return nil
+'
 
-
+this is the code snippet for the case where there are different cases present 
+    
 
 
