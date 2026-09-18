@@ -26,6 +26,7 @@ This catches both:
 and:
 "   "
 
+The initial VEX ingestion changes are in place, and the relevant package-level tests are passing. The full repository test suite is currently taking longer than expected, so I’m validating the remaining components separately and will keep pushing incremental updates as the implementation progresses.
 
 
 
