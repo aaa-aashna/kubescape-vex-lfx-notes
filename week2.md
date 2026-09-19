@@ -1,4 +1,4 @@
-## 9. Week 2 plan
+##  Week 2 plan
 
 I will move from the high level concepts to the actual code.
 
@@ -38,6 +38,9 @@ case StatusNotAffected,
 '
 
 this is the code snippet for the case where there are different cases present 
-    
+
+Deleted file 
+PR is superseded by #880, and that the duplicate internal/vex implementation should be dropped.
+	
 
 
