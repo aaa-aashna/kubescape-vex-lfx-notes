@@ -45,15 +45,15 @@ PR is superseded by #880, and that the duplicate internal/vex implementation sho
 
 
 External VEX URL
-      ↓
+
 vexsource.Fetch()
-      ↓
+      
 vexbatch.Document
-      ↓
+      
 vexbatch.Apply()
-      ↓
+      
 Grype matches
-      ↓
+      
 kubevuln CVE results
 
 ( raising PR related to this flow ) 
