@@ -58,3 +58,20 @@ kubevuln CVE results
 
 ( raising PR related to this flow ) 
 
+
+New flow is usually being followed by the files which we need to update and then we will updating depending upon the new flow 
+SBOM
+ 
+Grypy scanner
+ ↓
+match.Matches
+ ↓
+vexsource.Fetch()
+ ↓
+vexbatch.Apply()
+ ↓
+filtered match.Matches
+ ↓
+grype → kubevuln conversion
+
+So grype is usually helped to trace documents and then we add additional files 
