@@ -43,3 +43,20 @@ Suppress matching findings
 
 Noted down this implementation flow , so that i have a roadmap in my mind about things to be done
 adding files 
+
+ew flow is usually being followed by the files which we need to update and then we will updating depending upon the new flow 
+SBOM
+ 
+Grypy scanner
+ ↓
+match.Matches
+ ↓
+vexsource.Fetch()
+ ↓
+vexbatch.Apply()
+ ↓
+filtered match.Matches
+ ↓
+grype → kubevuln conversion
+
+So grype is usually helped to trace documents and then we add additional files 
