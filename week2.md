@@ -75,3 +75,37 @@ filtered match.Matches
 grype → kubevuln conversion
 
 So grype is usually helped to trace documents and then we add additional files 
+
+External VEX Ingestion — Changes Made
+- Refactored internal/vexsource so that Source.Fetch() is responsible only for fetching and validating an external VEX document.
+- Removed temporary-file creation from Source.Fetch(). It now returns a validated Document containing the source URL and raw VEX bytes.
+- Added an Ingestor abstraction that uses the existing safefetch implementation to retrieve external VEX sources.
+- Reused the existing vexvalidate package to validate the fetched VEX data instead of introducing new validation logic.
+- Added focused tests covering:
+  - successful VEX fetching
+  - empty source URL
+  - nil fetcher
+  - fetch failures
+  - invalid VEX documents
+  - successful Ingestor ingestion
+- Added package documentation explaining the intended boundary: the future VEXSource controller from #387 will handle persistence and temporary-file preparation for Grype.
+- Updated docs/VEX.md to document the role of the new internal/vexsource package.
+- Kept the implementation dependency-free by using the existing safefetch and vexvalidate primitives.
+Architecture after the change
+External VEX URL
+       ↓
+   safefetch
+       ↓
+   Source.Fetch()
+       ↓
+   vexvalidate
+       ↓
+ validated VEX bytes
+       ↓
+ VEXSource controller (#387)
+       ↓
+ persistence / temp-file staging
+       ↓
+      Grype
+
+Core idea: vexsource handles retrieval + validation, while persistence and Grype-specific file handling stay outside the package.
