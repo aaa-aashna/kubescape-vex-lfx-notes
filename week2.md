@@ -109,3 +109,86 @@ External VEX URL
       Grype
 
 Core idea: vexsource handles retrieval + validation, while persistence and Grype-specific file handling stay outside the package.
+
+
+Status Handling
+The supported VEX statuses will continue to be handled explicitly:
+case StatusNotAffected,
+    StatusAffected,
+    StatusFixed,
+    StatusUnderInvestigation:
+    return nil
+
+The next step is to understand how these statuses should affect the final vulnerability result after VEX is applied.
+In particular, I will verify how not_affected and fixed statements influence the filtering of vulnerability matches, while affected and under_investigation continue to represent relevant vulnerability states.
+Testing
+Focused tests will be added around the VEX application stage.
+The tests will cover:
+- Matching VEX statements to vulnerability results.
+- Applying a not_affected statement.
+- Applying a fixed statement.
+- Handling affected statements.
+- Handling under_investigation statements.
+- VEX statements with no matching vulnerability.
+- Multiple vulnerability matches.
+- Invalid VEX documents.
+- Missing or incomplete VEX fields.
+- Ensuring unrelated vulnerability matches remain unchanged.
+- Ensuring existing vulnerability processing continues to work when no external VEX is provided.
+Integration With Existing Flow
+The implementation will be kept within the existing vulnerability processing pipeline rather than introducing a separate parallel vulnerability flow.
+The intended architecture is:
+                 External VEX
+                      │
+                      ▼
+               vexsource.Fetch()
+                      │
+                      ▼
+              VEX validation
+                      │
+                      ▼
+              Validated Document
+                      │
+                      ▼
+                vexbatch.Apply()
+                      │
+                      ▼
+SBOM → Grype → match.Matches
+                      │
+                      ▼
+               VEX filtering
+                      │
+                      ▼
+          filtered match.Matches
+                      │
+                      ▼
+             kubevuln conversion
+                      │
+                      ▼
+             kubevuln CVE results
+
+Controller Preparation
+Alongside the VEX application work, I will continue studying the future VEXSource controller from #387.
+The controller will eventually be responsible for:
+- Managing external VEX sources.
+- Triggering VEX retrieval.
+- Handling persistence.
+- Preparing temporary files where required by Grype.
+- Connecting the external VEX source with the vulnerability scanning workflow.
+- Reusing the existing WatchHandler and CooldownQueue mechanisms where appropriate.
+The current vexsource package will remain focused on retrieval and validation, keeping controller-specific responsibilities outside the package.
+Expected Outcome
+By the end of Week 3, the goal is to have a clear and tested path from:
+External VEX URL
+        ↓
+Fetch
+        ↓
+Validate
+        ↓
+Apply VEX
+        ↓
+Filter / update vulnerability matches
+        ↓
+kubevuln results
+
+This will provide the foundation required for integrating the external VEX source with the VEXSource controller in the following stage of the implementation.
