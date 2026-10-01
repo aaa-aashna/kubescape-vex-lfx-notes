@@ -13,7 +13,7 @@ Determine where external VEX can suppress `not_affected` / `fixed` vulnerability
 - Added a Docker fixture integration test covering OpenVEX suppression during a Grype scan.
 - Verified that `CVE-2023-1255` from the OpenVEX fixture is removed from the final vulnerability matches.
 
-## Important Matching Logic
+## Matching Logic
 
 External VEX application depends on how `vexbatch.Apply` matches `s.Source` against the VEX products.
 
@@ -29,7 +29,7 @@ Add two regression tests to verify that VEX is not incorrectly applied when prod
 2. Mismatched identity → VEX does not suppress the finding.
 
 ## Flow
-
+```
 SBOM
 ↓
 Grype Scan
@@ -45,6 +45,7 @@ Suppressed findings removed
 Final scan results
 ↓
 Existing SecurityException / storage flow
+```
 
 ## Likely Result
 
