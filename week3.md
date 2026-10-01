@@ -46,6 +46,6 @@ Final scan results
 ↓
 Existing SecurityException / storage flow
 
-## Key Week 3 Result
+## Likely Result
 
 External VEX is now integrated at the correct point in the Grype scanning pipeline without replacing the existing VEX matching or downstream SecurityException/storage behavior.
