@@ -1,6 +1,7 @@
-# Week 1 — Understanding Kubescape VEX Project
+# Week 1 
+Understanding Kubescape VEX Project
 
-## 🎯 Week 1 Goal
+##  Week 1 Goal
 
 This week was mainly about understanding **how Kubescape finds vulnerabilities** and where **VEX fits into the whole process**.
 
@@ -282,36 +283,10 @@ The VEX matching step needs to check:
 
 If the statement says `not_affected` or `fixed`, the matching finding may be suppressed according to the project rules.
 
-##
 
 ---
-
-## 8. Week 1 Outcome
-
-By the end of Week 1, I understood:
-
-- The basic Kubescape vulnerability scanning flow.
-- The role of Syft.
-- What an SBOM contains.
-- How Grype generates vulnerability findings.
-- Why scanners can produce noisy results.
-- What VEX is used for.
-- The meaning of important VEX statuses.
-- Why product/component identity matters during matching.
-- What OpenVEX means.
-- Why reusing the existing VEX storage structure is useful.
-- The main implementation goals of the LFX project.
 
 The next step is to connect this understanding with the actual Kubescape/kubevuln source code and start identifying the exact implementation points.
 
 ---
 
-## Main takeaway
-
-The project is basically about making vulnerability reports smarter.
-
-Instead of treating every scanner finding as equally relevant, Kubescape should also consider:
-
-> **“Has the vendor already explained whether this vulnerability actually affects this product?”**
-
-That is where external VEX ingestion comes in.
