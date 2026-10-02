@@ -103,3 +103,62 @@ remainingMatches + ignoredMatches
   ↓
 CVEManifest
 ```
+
+The Docker fixture now tests three meaningful scenarios.
+1. Matching identity
+```
+Grype identity
+      ↓
+alpine@GOOD
+      ↓
+VEX product
+      ↓
+alpine@GOOD
+      ↓
+MATCH
+```
+Expected:
+libcrypto3
+
+```
+CVE-2023-1255
+        ↓
+IgnoredMatches
+```
+while the unrelated libssl3 finding remains active.
+2. Missing content identity
+This is the case the latest reviewer specifically wanted strengthened.
+You now want:
+SBOM content:
+Tags       = []
+RepoDigests = []
+
+Annotation:
+ImageIDMetadataKey = nonempty
+
+This proves:
+A nonempty annotation alone cannot activate external VEX.
+```
+Expected:
+CVE-2023-1255
+        ↓
+remains in Matches
+```
+This directly covers the original bypass.
+3. Mismatched content identity
+You modify the actual Syft source metadata to something like:
+library/alpine@sha256:000000...
+
+while the VEX document targets:
+library/alpine@sha256:e2e168...
+
+Therefore:
+Grype identity ≠ VEX product identity
+
+Expected:
+```
+CVE-2023-1255
+        ↓
+remains in Matches
+```
+This is a very important regression test because merely changing the annotation would not have tested the actual Grype identity.
