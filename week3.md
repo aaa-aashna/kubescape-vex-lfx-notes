@@ -90,3 +90,16 @@ Then, after Grype produces its vulnerability matches, your code calls the existi
 vexbatch.Apply(...)
 
 This is important because you're reusing the project's existing VEX application logic instead of implementing OpenVEX matching again inside the Grype adapter.
+
+So conceptually:
+```
+Grype
+  ↓
+Matches
+  ↓
+vexbatch.Apply()
+  ↓
+remainingMatches + ignoredMatches
+  ↓
+CVEManifest
+```
