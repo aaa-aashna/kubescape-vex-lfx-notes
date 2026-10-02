@@ -50,3 +50,43 @@ Existing SecurityException / storage flow
 ## Likely Result
 
 External VEX is now integrated at the correct point in the Grype scanning pipeline without replacing the existing VEX matching or downstream SecurityException/storage behavior.
+
+What this PR does
+The core problem is:
+Kubescape can generate VEX, but when it scans an SBOM with Grype, it previously had no way to consume an external VEX document and use that information to suppress findings.
+
+Your PR connects the external VEX flow to the existing Grype vulnerability-scanning pipeline.
+The flow is essentially:
+```
+SBOM
+  │
+  ▼
+Grype vulnerability scan
+  │
+  ▼
+CVE / vulnerability matches
+  │
+  ├── External VEX documents
+  │        │
+  │        ▼
+  │   vexbatch.Apply(...)
+  │        │
+  │        ├── not_affected → IgnoredMatches
+  │        └── applicable   → Matches
+  │
+  ▼
+Final CVE Manifest
+```
+
+So you're not replacing Grype's vulnerability detection. You're adding an additional decision layer after Grype has identified vulnerabilities.
+The important architectural change
+The key integration point is inside:
+adapters/v1/grype.go
+
+The PR introduces the ability for the SBOM scan to receive VEX documents explicitly:
+ScanSBOMWithVEX(...)
+
+Then, after Grype produces its vulnerability matches, your code calls the existing:
+vexbatch.Apply(...)
+
+This is important because you're reusing the project's existing VEX application logic instead of implementing OpenVEX matching again inside the Grype adapter.
