@@ -24,3 +24,8 @@ Week 3–4 is supposed to cover VEX fetching, parsing, internal representation, 
   - invalid CSAF documents
 - Validated the implementation against the existing external VEX processing flow and maintained compatibility with the normal vulnerability scanning architecture.
 
+## Key Outcome
+
+The Week 4 implementation extends the external VEX ingestion path from OpenVEX-only handling to **format-aware OpenVEX/CSAF ingestion**, with validation and staging before the documents are handed to the existing VEX application machinery.
+
+This establishes the foundation for handling external VEX sources without allowing malformed or unsupported external data to silently interfere with the normal scan path.
