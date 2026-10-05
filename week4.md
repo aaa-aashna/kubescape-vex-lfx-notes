@@ -29,3 +29,14 @@ Week 3–4 is supposed to cover VEX fetching, parsing, internal representation, 
 The Week 4 implementation extends the external VEX ingestion path from OpenVEX-only handling to **format-aware OpenVEX/CSAF ingestion**, with validation and staging before the documents are handed to the existing VEX application machinery.
 
 This establishes the foundation for handling external VEX sources without allowing malformed or unsupported external data to silently interfere with the normal scan path.
+
+## PR
+
+**[PR #1157 — `feat(vex): support CSAF external source ingestion`](https://github.com/kubescape/kubevuln/pull/1157)**
+
+## Next Steps
+
+- Address CI and reviewer feedback on PR #1157.
+- Continue strengthening unavailable and malformed external VEX handling.
+- Expand integration coverage around the complete fetch → parse → validate → apply flow.
+- Continue toward the remaining external VEX ingestion requirements defined in the proposal.
