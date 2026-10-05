@@ -7,3 +7,17 @@ And there is a useful clue in#1108 itself: the repository already has vexsource,
 Next, we should inspect the current main state of those VEX packages and the related issue/design history  before writing Week 4 code. That will tell us exactly what infrastructure already exists and what the PR should add rather than duplicate.
 
 Week 3–4 is supposed to cover VEX fetching, parsing, internal representation, basic malformed/unavailable handling, and an initial fetch/parse prototype independent of the normal scan.
+
+
+Work Completed
+
+-Added explicit VEX source format selection, with OpenVEX retained as the backward-compatible default.
+-Added CSAF validation using the upstream gocsaf/csaf/v3 loader before documents reach the matching layer.
+-Preserved the selected VEX format throughout the fetched document lifecycle.
+-Added BatchDocument to safely stage validated OpenVEX and CSAF documents for Grype's file-based VEX processor.
+-Added test coverage for:
+-default OpenVEX ingestion and staging
+-real Red Hat CSAF/VEX ingestion using the existing CVE-2024-3094 fixture
+-unsupported formats
+-invalid CSAF documents
+-Validated the implementation against the existing external VEX processing flow and maintained compatibility with the existing vulnerability handling architecture.
