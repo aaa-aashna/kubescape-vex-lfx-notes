@@ -8,6 +8,24 @@ Next, we should inspect the current main state of those VEX packages and the rel
 
 Week 3–4 is supposed to cover VEX fetching, parsing, internal representation, basic malformed/unavailable handling, and an initial fetch/parse prototype independent of the normal scan.
 
+The work focused on:
+
+Supporting CSAF advisories alongside OpenVEX documents.
+
+Introducing explicit source-format selection while retaining OpenVEX as the default.
+
+Validating external CSAF documents before they enter the matching and application workflow.
+
+Preserving source-format information throughout fetching and document staging.
+
+Preparing validated documents for Grype's existing file-based VEX processor.
+
+Handling malformed CSAF structures and unsupported formats without allowing invalid external data to trigger an uncontrolled panic.
+
+Adding regression tests for both successful ingestion and invalid input.
+
+The implementation builds on the existing safefetch, vexvalidate, vexdoc, and vexbatch packages instead of creating a separate VEX processing architecture.
+
 
 ## Work Completed
 
