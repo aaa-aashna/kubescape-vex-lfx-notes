@@ -8,6 +8,25 @@ Next, we should inspect the current main state of those VEX packages and the rel
 
 Week 3–4 is supposed to cover VEX fetching, parsing, internal representation, basic malformed/unavailable handling, and an initial fetch/parse prototype independent of the normal scan.
 
+4. Technical Changes
+
+4.1 Explicit VEX Format Selection
+
+The Source structure was extended to include a format field.
+
+type Source struct {
+    URL    string
+    Format vexbatch.Format
+}
+
+Previously, callers supplied the source URL and the ingestion path validated the response as OpenVEX.
+
+The new structure allows callers to identify the intended format explicitly:
+
+openvex — OpenVEX document.
+
+csaf — CSAF advisory.
+
 The work focused on:
 
 Supporting CSAF advisories alongside OpenVEX documents.
