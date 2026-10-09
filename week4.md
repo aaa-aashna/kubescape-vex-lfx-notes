@@ -1,4 +1,4 @@
-#week 4
+# week 4
 
 We should work toward a PR that meaningfully implements:
 external VEX source → fetch → parse → validate/normalize into internal document representation → hand off to existing VEX application machinery
