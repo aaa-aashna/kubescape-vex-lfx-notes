@@ -14,10 +14,3 @@ Connect the external VEX processing pipeline to the existing vulnerability scann
 Ensure validated and normalized VEX documents are passed to the existing VEX application machinery.
 Verify that external VEX information is reflected correctly in the final vulnerability results.
 
-Planned Work
-
-1. Integrate External VEX with Scan Results
-
-Connect the external VEX processing pipeline to the existing vulnerability scanning workflow.
-Ensure validated and normalized VEX documents are passed to the existing VEX application machinery.
-Verify that external VEX information is reflected correctly in the final vulnerability results.
