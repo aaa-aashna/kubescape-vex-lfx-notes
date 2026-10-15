@@ -1,34 +1,112 @@
-# Week 5
+# Weeks 5–7: External VEX Ingestion for Kubescape
+
+## Overview
+
+The focus of Weeks 5, 6, and 7 is to strengthen the external VEX ingestion pipeline by supporting multiple VEX formats, integrating validated documents with the existing vulnerability scanning workflow, and improving error handling and test coverage.
+
+The goal is to allow Kubescape to consume externally published VEX documents while preserving the existing scanning behavior and ensuring that invalid or unavailable external sources do not silently disrupt vulnerability analysis.
 
 ## Objectives
 
-- Integrate external VEX ingestion with Kubescape’s existing vulnerability scanning and result-handling flow.
-- Strengthen error handling for unavailable sources, fetch failures, malformed documents, and unsupported formats.
-- Ensure external VEX processing failures do not silently disrupt normal vulnerability scanning.
+- Integrate external VEX ingestion into the existing vulnerability scanning and result-handling workflow.
+- Support OpenVEX and CSAF documents while maintaining backward compatibility.
+- Validate and normalize external VEX documents before applying their statements.
+- Improve handling of source, fetching, parsing, validation, and format errors.
+- Reuse the existing VEX application machinery wherever possible.
+- Add regression tests for supported formats, malformed documents, and failure scenarios.
 
-## Planned Work
+## Week 5: External VEX Ingestion and Format Support
 
-The external VEX processing pipeline follows these stages:
+### Objectives
 
-1. **Source Identification:** Identify the configured external VEX source and its format.
-2. **Fetching:** Retrieve the VEX document from the external source.
-3. **Parsing:** Decode the document according to its supported format.
-4. **Validation and Normalization:** Validate the document and convert it into the internal representation expected by the existing processing pipeline.
-5. **Application:** Pass the validated document to the existing VEX application machinery.
-6. **Result Handling:** Apply applicable statements to vulnerability scan results while preserving relevant metadata.
-7. **Failure Handling:** Ensure errors in external VEX processing do not silently corrupt or invalidate the normal scanning workflow.
+- Identify and retrieve configured external VEX sources.
+- Support format-aware ingestion for OpenVEX and CSAF.
+- Validate external documents before passing them to downstream processing.
+- Preserve format information throughout the ingestion pipeline.
 
-## Completed Week 5 Outcomes
+### Work Areas
 
-- Extended external VEX ingestion to support both OpenVEX and CSAF formats, with OpenVEX remaining the default for backward compatibility.
-- Added format-specific validation for CSAF documents using the upstream CSAF loader.
-- Added explicit handling for unsupported formats and invalid CSAF documents.
-- Preserved the selected format throughout the ingestion process.
-- Implemented temporary-file staging to prepare validated VEX documents for consumption by the existing batch-processing workflow.
-- Added tests covering default OpenVEX ingestion, CSAF ingestion using a real Red Hat advisory fixture, unsupported formats, invalid documents, and malformed CSAF structures.
-- Verified the changes with targeted Go tests and CI checks for the external VEX processing components.
+1. **Source identification:** Determine the configured external VEX source and its declared format.
+2. **Fetching:** Retrieve the document through the existing source-fetching layer.
+3. **Parsing:** Decode the document according to its format.
+4. **Validation:** Reject malformed or unsupported documents before application.
+5. **Normalization:** Prepare validated documents for the internal processing pipeline.
+6. **Compatibility:** Keep OpenVEX as the default format unless another format is explicitly configured.
 
-## Pull Request Reference
+### Expected Outcome
 
-- [PR #1157 — Support CSAF External Source Ingestion](https://github.com/kubescape/kubevuln/pull/1157)
+A format-aware ingestion pipeline that can retrieve and validate external OpenVEX and CSAF documents without breaking existing OpenVEX behavior.
 
+## Week 6: Integration with Vulnerability Scanning
+
+### Objectives
+
+- Connect validated external VEX documents to the existing vulnerability scanning workflow.
+- Reuse the established VEX application machinery.
+- Ensure applicable VEX statements can influence vulnerability results.
+- Preserve existing scan behavior when external VEX data is absent or cannot be processed.
+
+### Work Areas
+
+1. **Document staging:** Prepare validated documents for the existing file-based VEX processing workflow.
+2. **Pipeline integration:** Pass staged documents to the existing VEX application mechanism.
+3. **Result handling:** Apply relevant VEX statements to matching vulnerabilities.
+4. **Metadata preservation:** Retain the information required for downstream processing and result interpretation.
+5. **Regression testing:** Verify that external VEX integration does not change unrelated scanning behavior.
+
+### Expected Outcome
+
+External VEX documents can participate in the existing vulnerability scanning workflow without requiring a separate vulnerability-result processing implementation.
+
+## Week 7: Reliability, Error Handling, and Regression Testing
+
+### Objectives
+
+- Strengthen error handling across the external VEX ingestion pipeline.
+- Cover failures at source retrieval, parsing, validation, and application stages.
+- Prevent malformed external data from causing unexpected failures.
+- Verify the behavior of the complete ingestion-to-application workflow.
+
+### Work Areas
+
+1. **Source failures:** Handle unavailable sources and unsuccessful fetch operations.
+2. **Format validation:** Reject unsupported formats and invalid documents with clear errors.
+3. **Malformed data:** Test unexpected or malformed document structures.
+4. **Failure isolation:** Ensure external VEX processing failures are handled explicitly and do not silently corrupt the normal scan workflow.
+5. **Regression coverage:** Test both successful ingestion and failure scenarios.
+6. **Verification:** Run targeted Go tests and relevant CI checks.
+
+### Expected Outcome
+
+A more robust external VEX pipeline with predictable failure behavior, stronger regression coverage, and improved compatibility with the existing scanner.
+
+## End-to-End Workflow
+
+The intended processing flow is:
+
+1. Identify the configured external VEX source.
+2. Fetch the document.
+3. Determine the document format.
+4. Parse the document.
+5. Validate and normalize its contents.
+6. Stage the validated document for downstream processing.
+7. Apply VEX statements through the existing application machinery.
+8. Handle errors explicitly and preserve normal scanning behavior.
+
+## Testing and Validation
+
+Testing should cover the following scenarios:
+
+- Default OpenVEX ingestion.
+- Successful CSAF ingestion using a valid document.
+- Unsupported VEX formats.
+- Invalid or malformed CSAF documents.
+- Fetch failures and unavailable sources.
+- Successful staging and application of validated documents.
+- Regression tests confirming that the normal scan workflow remains functional when external VEX processing fails.
+
+Targeted package tests and relevant CI checks should be run after implementation changes.
+
+These PRs provide implementation context for the overall project. They should not all be treated as work completed specifically during Weeks 5–7 unless the weekly timeline confirms that attribution.
+
+By the end of Week 7, the external VEX ingestion workflow should support format-aware document retrieval, validation, and integration with existing vulnerability scanning. It should reuse established processing components, handle invalid external data predictably, and maintain the reliability of Kubescape's normal vulnerability scanning path.
