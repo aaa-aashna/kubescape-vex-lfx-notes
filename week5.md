@@ -107,6 +107,5 @@ Testing should cover the following scenarios:
 
 Targeted package tests and relevant CI checks should be run after implementation changes.
 
-These PRs provide implementation context for the overall project. They should not all be treated as work completed specifically during Weeks 5–7 unless the weekly timeline confirms that attribution.
 
 By the end of Week 7, the external VEX ingestion workflow should support format-aware document retrieval, validation, and integration with existing vulnerability scanning. It should reuse established processing components, handle invalid external data predictably, and maintain the reliability of Kubescape's normal vulnerability scanning path.
