@@ -1,4 +1,4 @@
-# Weeks 5–7: External VEX Ingestion for Kubescape
+# Weeks 5–7 : External VEX Ingestion for Kubescape
 
 ## Overview
 
