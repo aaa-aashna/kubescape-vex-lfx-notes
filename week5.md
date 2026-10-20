@@ -108,4 +108,4 @@ Testing should cover the following scenarios:
 Targeted package tests and relevant CI checks should be run after implementation changes.
 
 
-By the end of Week 7, the external VEX ingestion workflow should support format-aware document retrieval, validation, and integration with existing vulnerability scanning. It should reuse established processing components, handle invalid external data predictably, and maintain the reliability of Kubescape's normal vulnerability scanning path.
+By the end of Week 7, the external VEX ingestion workflow should support format-aware document retrieval, validation, and integration with existing vulnerability scanning. It should reuse established processing components, handle invalid external data predictably, and maintain the reliability of Kubescape's normal vulnerability scanning path 
