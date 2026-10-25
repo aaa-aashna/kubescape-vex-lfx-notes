@@ -83,7 +83,6 @@ A more robust external VEX pipeline with predictable failure behavior, stronger 
 ## End-to-End Workflow
 
 The intended processing flow is:
-
 1. Identify the configured external VEX source.
 2. Fetch the document.
 3. Determine the document format.
