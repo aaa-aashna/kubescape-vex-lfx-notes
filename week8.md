@@ -1,5 +1,5 @@
 
-# Week 8 Report — External VEX Ingestion for Kubescape
+# Week 8 Report 
 
 ## Objectives
 
