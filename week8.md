@@ -22,8 +22,6 @@ Implemented improvements to normalize external VEX inputs before passing them to
 - Kept OpenVEX and CSAF documents grouped separately for format-correct processing.
 - Added unit tests for normalization, duplicate references, empty paths, and unsupported formats.
 
-**Pull request:** [#1179 — Normalize external VEX batches](https://github.com/kubescape/kubevuln/pull/1179)
-
 ### 2. Preserve Findings Without Matching VEX Statements
 
 Expanded regression coverage to verify that external VEX processing does not incorrectly remove unrelated vulnerability findings.
