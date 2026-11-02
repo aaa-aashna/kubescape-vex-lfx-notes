@@ -31,8 +31,6 @@ Expanded regression coverage to verify that external VEX processing does not inc
 - Confirmed that unmatched findings remain in scan results when OpenVEX and CSAF documents are applied.
 - Kept Grype responsible for matching VEX statements against vulnerability findings instead of introducing a separate matching engine.
 
-**Pull request:** [#1180 — Preserve findings without matching VEX statements](https://github.com/kubescape/kubevuln/pull/1180)
-
 ## Testing and Validation
 
 The changes included focused regression and unit tests covering:
