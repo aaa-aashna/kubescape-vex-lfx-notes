@@ -9,8 +9,6 @@
 - Strengthen regression coverage for mixed-format VEX processing.
 - Keep vulnerability matching and evaluation delegated to Grype's existing processing logic.
 
-
-
 ## Work Completed
 
 ### 1. External VEX Batch Normalization
