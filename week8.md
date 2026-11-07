@@ -43,7 +43,6 @@ The changes included focused regression and unit tests covering:
 - Preservation of findings without matching VEX statements.
 - Correct filtering of findings matched by VEX statements.
 
-Both PRs were merged into the upstream `kubescape/kubevuln` repository.
 
 ## Key Outcomes
 
