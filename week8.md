@@ -43,7 +43,6 @@ The changes included focused regression and unit tests covering:
 - Preservation of findings without matching VEX statements.
 - Correct filtering of findings matched by VEX statements.
 
-
 ## Key Outcomes
 
 - Improved consistency at the external VEX input-preparation boundary.
