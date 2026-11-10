@@ -44,7 +44,6 @@ The changes included focused regression and unit tests covering:
 - Correct filtering of findings matched by VEX statements.
 
 ## Key Outcomes
-
 - Improved consistency at the external VEX input-preparation boundary.
 - Reduced the risk of duplicate or invalid document references reaching the processor.
 - Preserved format separation for OpenVEX and CSAF documents.
