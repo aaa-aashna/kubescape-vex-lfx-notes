@@ -52,7 +52,6 @@ The changes included focused regression and unit tests covering:
 - Continued reusing Grype's existing VEX matching and evaluation behavior.
 
 ## Next Steps
-
 - Continue end-to-end verification of external VEX ingestion and scan-result handling.
 - Expand coverage for source-fetching and document-validation failures.
 - Review error propagation and logging across the ingestion pipeline.
