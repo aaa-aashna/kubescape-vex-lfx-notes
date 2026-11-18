@@ -13,12 +13,6 @@ This project enables Kubescape to consume and process externally sourced VEX doc
 ## Workflow
 External Source → Fetch → Parse → Validate → Normalize → Apply VEX → Scanning Results
 
-## Tech Stack
-- Go
-- OpenVEX
-- CSAF
-- Grype
-
 ## Project Details
 - **Organization:** CNCF – Kubescape
 - **Program:** LFX Mentorship Term 3, 2026
